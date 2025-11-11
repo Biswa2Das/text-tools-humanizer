@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Tools - Humanize</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      width: 450px;
+      padding: 16px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+      color: #2c3e50;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 16px;
+      color: #1a202c;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    h1::before {
+      content: '✨';
+      font-size: 24px;
+    }
+
+    .section {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      transition: all 0.2s ease;
+      background: white;
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    textarea::placeholder {
+      color: #a0aec0;
+    }
+
+    #inputText {
+      min-height: 120px;
+    }
+
+    #outputText {
+      min-height: 120px;
+      background: #f7fafc;
+      cursor: default;
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: #718096;
+      text-align: right;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .options-toggle {
+      cursor: pointer;
+      background: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 2px solid #e2e8f0;
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      color: #2d3748;
+      margin-bottom: 12px;
+    }
+
+    .options-toggle:hover {
+      background: #f7fafc;
+      border-color: #cbd5e0;
+    }
+
+    .options-toggle::after {
+      content: '▼';
+      font-size: 10px;
+      transition: transform 0.2s ease;
+    }
+
+    .options-toggle.expanded::after {
+      transform: rotate(180deg);
+    }
+
+    .options {
+      background: white;
+      padding: 14px;
+      border-radius: 8px;
+      border: 2px solid #e2e8f0;
+      margin-bottom: 12px;
+      animation: slideDown 0.2s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .row:last-child {
+      margin-bottom: 0;
+    }
+
+    .select-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .select-group label {
+      font-size: 11px;
+      margin-bottom: 4px;
+      color: #4a5568;
+    }
+
+    select {
+      padding: 8px 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 13px;
+      background: white;
+      color: #2d3748;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    select:hover {
+      border-color: #cbd5e0;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .pii-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .checkbox-row:hover {
+      background: #f7fafc;
+    }
+
+    .checkbox-row:last-child {
+      margin-bottom: 0;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #4299e1;
+    }
+
+    .checkbox-row label {
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: normal;
+      margin: 0;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 11px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      letter-spacing: 0.3px;
+    }
+
+    #humaniseBtn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    #humaniseBtn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    #humaniseBtn:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    #humaniseBtn:disabled {
+      background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.7;
+    }
+
+    #copyBtn {
+      background: #48bb78;
+      color: white;
+      box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+    }
+
+    #copyBtn:hover {
+      background: #38a169;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+    }
+
+    #copyBtn.copied {
+      background: #38a169;
+      animation: pulse 0.3s ease;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    #clearBtn {
+      background: #718096;
+      color: white;
+      flex: 0 0 auto;
+      padding: 11px 14px;
+    }
+
+    #clearBtn:hover {
+      background: #4a5568;
+      transform: translateY(-1px);
+    }
+
+    .status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+      animation: slideIn 0.3s ease;
+      font-weight: 500;
+      border-left: 4px solid;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .status.error {
+      background: #fff5f5;
+      color: #c53030;
+      border-color: #fc8181;
+    }
+
+    .status.success {
+      background: #f0fff4;
+      color: #22543d;
+      border-color: #68d391;
+    }
+
+    .status.info {
+      background: #ebf8ff;
+      color: #2c5282;
+      border-color: #4299e1;
+    }
+
+    .status::before {
+      margin-right: 6px;
+    }
+
+    .status.error::before {
+      content: '⚠️';
+    }
+
+    .status.success::before {
+      content: '✓';
+    }
+
+    .status.info::before {
+      content: 'ℹ️';
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: #a0aec0;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .footer a {
+      color: #4299e1;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Scrollbar styling */
+    textarea::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    textarea::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    textarea::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 4px;
+    }
+
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: #a0aec0;
+    }
+
+    /* Keyboard shortcut hint */
+    .shortcut-hint {
+      font-size: 11px;
+      color: #a0aec0;
+      margin-top: 4px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Humanizer AI</h1>
+  
+  <div id="status" class="status"></div>
+  
+  <div class="section">
+    <label for="inputText">Input Text</label>
+    <textarea id="inputText" placeholder="Paste your text here to humanize it..." aria-label="Input text"></textarea>
+    <div class="char-count" id="inputCharCount">0 / ∞</div>
+  </div>
+  
+  <button id="optionsToggle" class="options-toggle" aria-expanded="false">
+    Advanced Options
+  </button>
+  
+  <div id="options" class="options" style="display: none;">
+    <div class="row">
+      <div class="select-group">
+        <label for="perspectiveSelect">Perspective</label>
+        <select id="perspectiveSelect" aria-label="Perspective">
+          <option value="maintain">Maintain Original</option>
+          <option value="first-person">First Person</option>
+          <option value="second-person">Second Person</option>
+          <option value="third-person">Third Person</option>
+        </select>
+      </div>
+      <div class="select-group">
+        <label for="toneSelect">Tone</label>
+        <select id="toneSelect" aria-label="Tone">
+          <option value="natural">Natural</option>
+          <option value="casual">Casual</option>
+          <option value="professional">Professional</option>
+          <option value="academic">Academic</option>
+          <option value="friendly">Friendly</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="select-group">
+        <label for="styleSelect">Style</label>
+        <select id="styleSelect" aria-label="Style">
+          <option value="clear">Clear</option>
+          <option value="concise">Concise</option>
+          <option value="descriptive">Descriptive</option>
+          <option value="persuasive">Persuasive</option>
+          <option value="explanatory">Explanatory</option>
+        </select>
+      </div>
+      <div></div>
+    </div>
+    
+    <div class="pii-section">
+      <div class="checkbox-row">
+        <input type="checkbox" id="maskPII" aria-label="Mask PII">
+        <label for="maskPII">Mask PII (names, emails, phones)</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="maskBefore" checked aria-label="Mask before rewriting">
+        <label for="maskBefore">Mask before rewriting (privacy-focused)</label>
+      </div>
+    </div>
+  </div>
+  
+  <div class="actions">
+    <button id="humaniseBtn" aria-label="Humanize text">Humanize Text</button>
+    <button id="clearBtn" aria-label="Clear all">Clear</button>
+  </div>
+  
+  <div class="shortcut-hint">Press Ctrl+Enter to humanize</div>
+  
+  <div class="section">
+    <label for="outputText">Humanized Output</label>
+    <textarea id="outputText" readonly aria-label="Output text" aria-readonly="true"></textarea>
+    <div class="char-count" id="outputCharCount">0 / ∞</div>
+    <div class="actions">
+      <button id="copyBtn" aria-label="Copy output">Copy Output</button>
+    </div>
+  </div>
+  
+  <div class="footer">
+    Powered by local LLM • <a href="#" id="settingsLink">Settings</a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
