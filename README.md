@@ -115,8 +115,4 @@ Everything is fully local.
 ## 📜 License
 
 MIT License 
-# Want me to auto-generate the README as a file?
 
-Happy to! I can spit out an actual `.md` file you can download — just say the word.
-
-Or if you want a more fancy GitHub-style README (with badges, GIF demos, or screenshots), I can dress it up.
